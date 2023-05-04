@@ -1,2 +1,2 @@
 # validacao-comparacao
-file validation/comparison program: validate/compare a csv file with a folder
+C# file validation/comparison program: validate/compare a csv file with a folder
