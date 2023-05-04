@@ -1,0 +1,68 @@
+using ClosedXML.Excel;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Office2016.Drawing.Command;
+using System.IO;
+
+
+namespace ValidacaoDeArquivo;
+
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        // Caminho da pasta com os arquivos a serem comparados
+        string diretorioArquivos = @"C:\Arquivosparaler";
+        int contArquivosNaoEncontrados = 0;
+
+        StringBuilder sb = new StringBuilder();
+        var xls = new XLWorkbook(@"C:\Planilha_Atualizada.xlsx");
+        var planilha = xls.Worksheets.First(w => w.Name == "Planilha1");
+        var totalLinhas = planilha.Rows().Count();
+
+        // Listar os arquivos presentes na pasta
+        string[] arquivos = Directory.GetFiles(diretorioArquivos);
+
+        Console.WriteLine($"O total de Arquivos ate o Momento é = " + totalLinhas++);
+        Console.WriteLine("===============================================================================");
+
+        for (int l = 2; l <= totalLinhas; l++)
+        {
+            var arquivoId = planilha.Cell($"A{l}").Value.ToString();
+
+            // Verificar se existe um arquivo com o nome dentro da pasta, caso nao tenha ira mostrar oque falta!
+            string arquivo = Path.Combine(diretorioArquivos, arquivoId.ToLower());
+
+            if (!Array.Exists(arquivos, a => a.Equals(arquivo, StringComparison.OrdinalIgnoreCase)))
+            {
+                // Exibir o arquivo que não está presente na pasta
+                Console.WriteLine("arquivo não encontrado na pasta: " + "'" + arquivoId + "'" + ",");
+                contArquivosNaoEncontrados++;
+                sb.AppendLine(arquivoId);
+            }
+        }
+
+        Console.WriteLine("===============================================================================");
+        Console.WriteLine("Total de arquivos não encontrado(s):" + contArquivosNaoEncontrados);
+        Console.WriteLine("Total de arquivos encontrado(s)" + (totalLinhas - contArquivosNaoEncontrados).ToString());
+
+        EscreverArquivoCVS(sb.ToString());
+    }
+    
+    // Comando para salvar o arquivo em TXT ou CSV (caso queira salvar em CSV basta trocar o '.txt' por '.csv')!! 
+    public static void EscreverArquivoCVS(string conteudo)
+    {
+        string[] texto = { conteudo };
+
+        FileInfo arquivo = new FileInfo("C:\\Arquivosparaler\\ResultadoCarga.txt");
+
+        using (FileStream fileStream = arquivo.Create()) { };
+
+        File.WriteAllLines("C:\\Arquivosparaler\\ResultadoCarga.txt", texto);
+    }
+}
